@@ -14,11 +14,13 @@
   "license": "MIT",
   "dependencies": {
     "@newamerica/components": "0.0.4",
-    "@newamerica/data-table": "0.0.6",
+    "@newamerica/data-table": "0.0.7",
     "@newamerica/meta": "0.0.4",
     "@newamerica/scss": "0.0.2",
+    "d3-format": "^1.3.2",
     "react": "^16.3.0",
-    "react-dom": "^16.3.0"
+    "react-dom": "^16.3.0",
+    "react-table": "6.5.3"
   },
   "devDependencies": {
     "@babel/core": "^7.0.0",
