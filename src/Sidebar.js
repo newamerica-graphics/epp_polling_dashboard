@@ -12,50 +12,64 @@ export default class Sidebar extends React.Component {
 
   render() {
     const { expanded } = this.state;
-    const { onSampleChange } = this.props;
+    const { onFilterChange, tags } = this.props;
     return (
       <div className={`dv-Sidebar${expanded ? " expanded" : ""}`}>
         <button className="dv-Sidebar__button" onClick={this.expandSidebar}>
           Filters
         </button>
         <div className="dv-Sidebar__interior">
-          <CheckboxGroup
-            title="Sample size"
-            style={{ paddingBottom: "1rem", borderBottom: "solid 1px #ddd" }}
-            options={[
-              { checked: true, label: "< 1,000", id: "one" },
-              {
-                checked: true,
-                label: "1,000 - 5,000",
-                id: "two"
-              },
-              { checked: true, label: "> 5,000", id: "three" }
-            ]}
-            onChange={onSampleChange}
-          />
-          <CheckboxGroup
-            title="Sample Demographics"
-            style={{ paddingTop: "1rem" }}
-            options={[
-              {
-                checked: true,
-                label: "U.S. Adults",
-                id: slugify("U.S. Adults")
-              },
-              {
-                checked: true,
-                label: "College Students",
-                id: slugify("College Students")
-              },
-              { checked: true, label: "Faculty", id: slugify("Faculty") },
-              {
-                checked: true,
-                label: "Administrators",
-                id: slugify("Administrators")
+          <div>
+            <CheckboxGroup
+              title="Sample size"
+              style={{ paddingBottom: "1rem", borderBottom: "solid 1px #ddd" }}
+              options={[
+                { checked: true, label: "< 1,000", id: "one" },
+                {
+                  checked: true,
+                  label: "1,000 - 5,000",
+                  id: "two"
+                },
+                { checked: true, label: "> 5,000", id: "three" }
+              ]}
+              onChange={filterState => onFilterChange("size", filterState)}
+            />
+            <CheckboxGroup
+              title="Sample Demographics"
+              style={{ padding: "1rem 0", borderBottom: "solid 1px #ddd" }}
+              options={[
+                {
+                  checked: true,
+                  label: "U.S. Adults",
+                  id: "us-adults"
+                },
+                {
+                  checked: true,
+                  label: "College Students",
+                  id: "college-students"
+                },
+                { checked: true, label: "Faculty", id: "faculty" },
+                {
+                  checked: true,
+                  label: "Administrators",
+                  id: "administrators"
+                }
+              ]}
+              onChange={filterState =>
+                onFilterChange("demographics", filterState)
               }
-            ]}
-            onChange={e => console.log(e)}
-          />
+            />
+            <CheckboxGroup
+              title="Tags"
+              style={{ paddingTop: "1rem" }}
+              options={tags.map(tag => ({
+                id: tag,
+                checked: true,
+                label: tag.charAt(0).toUpperCase() + tag.slice(1)
+              }))}
+              onChange={filterState => onFilterChange("tags", filterState)}
+            />
+          </div>
         </div>
       </div>
     );

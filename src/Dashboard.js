@@ -9,24 +9,33 @@ import { format } from "d3-format";
 const Description = row => {
   return (
     <div className="dv-Dashboard__description">
+      <a
+        className="dv-Dashboard__download"
+        href={row.original["download"] || "#"}
+      >
+        <DownloadIcon />
+        Download
+      </a>
       <h3>Top findings directly from the report</h3>
       <div>
         {formatter(row.original["Top findings directly from the report"])}
       </div>
+      {Tags(row.original["Tags"])}
     </div>
   );
 };
 
-const Tags = ({ text }) => {
+const Tags = text => {
   const tags = text.split(", ");
   return (
-    <span className="dv-Dashboard__tags">
+    <div className="dv-Dashboard__tags">
+      <span className="dv-Dashboard__tag-title">Tags:</span>
       {tags.map(tag => (
         <span className="dv-Dashboard__tag">
           {tag.charAt(0).toUpperCase() + tag.slice(1)}
         </span>
       ))}
-    </span>
+    </div>
   );
 };
 
@@ -63,18 +72,6 @@ const columns = [
   },
   {
     Header: "Sample size",
-    accessor: "Sample size",
-    sortMethod: (a, b, desc) => {
-      const first = parseInt(a.replace(","));
-      const second = parseInt(b.replace(","));
-
-      if (typeof first === "number" && typeof second === "number") {
-        return second - first;
-      }
-    }
-  },
-  {
-    Header: "Sample size (number column)",
     accessor: "sample_number",
     sortMethod: (a, b, desc) => {
       return +b - +a;
@@ -88,73 +85,95 @@ const columns = [
     sortable: false,
     headerClassName: "not-sortable",
     minWidth: 350
-  },
-  {
-    Header: "Download",
-    Cell: () => <DownloadIcon />,
-    className: "dv-Dashboard__icon",
-    sortable: false,
-    headerClassName: "not-sortable",
-    minWidth: 120
-  },
-  {
-    Header: "Tags",
-    accessor: "Tags",
-    minWidth: 300,
-    sortable: false,
-    headerClassName: "not-sortable",
-    Cell: ({ value }) => (value ? <Tags text={value} /> : null)
   }
 ];
 
 export default class Dashboard extends React.Component {
   constructor(props) {
     super(props);
-    this.originalData = this.props.data;
     this.state = {
-      data: this.originalData
+      size: {
+        one: true,
+        two: true,
+        three: true
+      },
+      demographics: {
+        "us-adults": true,
+        "college-students": true,
+        administrators: true,
+        faculty: true
+      },
+      tags: this.props.data.reduce((acc, cur) => {
+        const tags = cur["Tags"].split(", ");
+        tags.forEach(tag => {
+          if (!acc[tag]) {
+            acc[tag] = true;
+          }
+        });
+        return acc;
+      }, {})
     };
-    this.onSampleChange = this.onSampleChange.bind(this);
+    this.onFilterChange = this.onFilterChange.bind(this);
   }
 
-  onSampleChange = filter => {
-    this.setState({ sampleFilter: filter });
+  onFilterChange = (name, filter) => {
+    console.log(name, filter);
+    this.setState({ [name]: filter });
   };
   render() {
-    const { data, sampleFilter } = this.state;
+    const { size, demographics, tags } = this.state;
     let _data = this.props.data;
-    if (sampleFilter) {
-      _data = this.props.data.filter(val => {
+    _data = this.props.data
+      .filter(val => {
         const num = +val["sample_number"];
-        if (sampleFilter.one && sampleFilter.two && sampleFilter.three) {
+        if (size.one && size.two && size.three) {
           return true;
         }
-        if (sampleFilter.one && sampleFilter.two) {
+        if (size.one && size.two) {
           return num <= 5000;
         }
-        if (sampleFilter.two && sampleFilter.three) {
+        if (size.two && size.three) {
           return num >= 1000;
         }
-        if (sampleFilter.one && sampleFilter.three) {
+        if (size.one && size.three) {
           return num <= 1000 || num >= 5000;
         }
-        if (sampleFilter.one) {
+        if (size.one) {
           return num <= 1000;
         }
-        if (sampleFilter.two) {
+        if (size.two) {
           return num >= 1000 && num <= 5000;
         }
-        if (sampleFilter.three) {
+        if (size.three) {
           return num >= 5000;
         }
         return false;
+      })
+      .filter(val => {
+        const demo = val["demographics_key"];
+        if (demographics[demo]) {
+          return true;
+        } else {
+          return false;
+        }
+      })
+      .filter(val => {
+        const tagString = val["Tags"];
+        if (
+          Object.keys(tags).some(key => tags[key] && tagString.includes(key))
+        ) {
+          return true;
+        } else {
+          return false;
+        }
       });
-    }
     return (
       <ChartContainer>
         <div className="dv-Dashboard__content">
-          <Sidebar onSampleChange={this.onSampleChange} />
-          <Title className="dv-Dashboard__title">This is a title</Title>
+          <Sidebar
+            onFilterChange={this.onFilterChange}
+            tags={Object.keys(tags)}
+          />
           <DataTableWithSearch
             columns={columns}
             data={_data}
