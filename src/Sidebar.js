@@ -33,6 +33,7 @@ export default class Sidebar extends React.Component {
                 { checked: true, label: "> 5,000", id: "three" }
               ]}
               onChange={filterState => onFilterChange("size", filterState)}
+              selectButtons={true}
             />
             <CheckboxGroup
               title="Sample Demographics"
@@ -58,6 +59,7 @@ export default class Sidebar extends React.Component {
               onChange={filterState =>
                 onFilterChange("demographics", filterState)
               }
+              selectButtons={true}
             />
             <CheckboxGroup
               title="Tags"
@@ -68,6 +70,7 @@ export default class Sidebar extends React.Component {
                 label: tag.charAt(0).toUpperCase() + tag.slice(1)
               }))}
               onChange={filterState => onFilterChange("tags", filterState)}
+              selectButtons={true}
             />
           </div>
         </div>
